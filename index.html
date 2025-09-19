@@ -380,6 +380,14 @@
                     <option value="groom">Сторона жениха</option>
                 </select>
             </div>
+            
+            <div class="form-group">
+                <label for="couple-filter">Жених и невеста:</label>
+                <select id="couple-filter">
+                    <option value="include">Включать в выборку</option>
+                    <option value="exclude" selected>Исключить из выборки</option>
+                </select>
+            </div>
         </div>
         
         <button class="my_button" onclick="startRandomization()">Запустить отбор!</button>
@@ -491,6 +499,7 @@
             var count = parseInt($("#participants-count").val());
             var genderFilter = $("#gender-filter").val();
             var sideFilter = $("#side-filter").val();
+            var coupleFilter = $("#couple-filter").val();
             
             // Проверяем корректность ввода
             if (isNaN(count) || count < 1 || count > 36) {
@@ -502,7 +511,7 @@
             // Имитируем задержку для анимации
             setTimeout(function() {
                 // Фильтруем гостей по критериям
-                var availableGuests = getAvailableGuests(genderFilter, sideFilter);
+                var availableGuests = getAvailableGuests(genderFilter, sideFilter, coupleFilter);
                 
                 // Проверяем, достаточно ли гостей после фильтрации
                 if (availableGuests.length < count) {
@@ -536,13 +545,18 @@
         }
         
         // Функция для получения доступных гостей с учетом критериев
-        function getAvailableGuests(genderFilter, sideFilter) {
+        function getAvailableGuests(genderFilter, sideFilter, coupleFilter) {
             var available = [];
             
             // Сначала пытаемся найти гостей, которые еще не участвовали в текущем круге
             for (var i = 0; i < guestNames.length; i++) {
                 // Проверяем, участвовал ли гость в текущем круге
                 if (selectedInCurrentRound.includes(i)) continue;
+                
+                // Проверяем, нужно ли исключать жениха и невесту
+                if (coupleFilter === "exclude" && (guestStatuses[i] === "Невеста 👰" || guestStatuses[i] === "Жених 🤵")) {
+                    continue;
+                }
                 
                 // Проверяем соответствие полу
                 var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
@@ -563,6 +577,11 @@
                 
                 // Повторяем поиск с очищенным списком участников текущего круга
                 for (var i = 0; i < guestNames.length; i++) {
+                    // Проверяем, нужно ли исключать жениха и невесту
+                    if (coupleFilter === "exclude" && (guestStatuses[i] === "Невеста 👰" || guestStatuses[i] === "Жених 🤵")) {
+                        continue;
+                    }
+                    
                     // Проверяем соответствие полу
                     var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
                     
