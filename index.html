@@ -50,6 +50,12 @@
             font-size: 28px;
         }
         
+        h3 {
+            font-size: 22px;
+            color: #777;
+            margin: 15px 0;
+        }
+        
         .form-container {
             background: #f8f9fa;
             padding: 25px;
@@ -112,6 +118,26 @@
             transform: none;
         }
         
+        .secondary_button {
+            background: linear-gradient(45deg, #2196f3, #21cbf3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: inline-block;
+        }
+        
+        .secondary_button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(33,150,243,0.4);
+        }
+        
         .results-container {
             display: none;
             margin-top: 30px;
@@ -137,6 +163,7 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transition: transform 0.3s;
             border: 3px solid #ffeb3b;
+            position: relative;
         }
         
         .participant-card:hover {
@@ -166,6 +193,12 @@
             font-size: 18px;
             color: #555;
             margin-bottom: 5px;
+        }
+        
+        .participant-times {
+            font-size: 16px;
+            color: #888;
+            font-style: italic;
         }
         
         .spinner {
@@ -207,6 +240,42 @@
             display: none;
         }
         
+        .stats-container {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .stats-item {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 18px;
+            color: #555;
+        }
+        
+        .stats-value {
+            font-weight: bold;
+            color: #e91e63;
+        }
+        
+        .reset-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
         @media (max-width: 768px) {
             .participants-grid {
                 grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -223,6 +292,11 @@
             .my_button {
                 font-size: 20px;
                 padding: 12px 25px;
+            }
+            
+            .stats-item {
+                display: block;
+                margin: 10px 0;
             }
         }
         
@@ -253,6 +327,12 @@
     <div class='main'>
         <h1>🎲 Рандомайзер участников конкурса 🎲</h1>
         
+        <div class="stats-container">
+            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">36</span></div>
+            <div class="stats-item">Уже участвовали: <span class="stats-value" id="participated-guests">0</span></div>
+            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">36</span></div>
+        </div>
+        
         <div class="form-container">
             <div class="form-group">
                 <label for="participants-count">Количество участников:</label>
@@ -279,12 +359,14 @@
         </div>
         
         <button class="my_button" onclick="startRandomization()">Запустить отбор!</button>
+        <button class="secondary_button" onclick="resetSelection()">Сбросить выбор</button>
         
         <div class="spinner" id="spinner"></div>
         <div class="error-message" id="error-message"></div>
         
         <div class="results-container" id="results-container">
             <h2>Выбранные участники:</h2>
+            <h3 id="round-info">Первый круг участия</h3>
             <div class="participants-grid" id="participants-grid">
                 <!-- Здесь будут отображаться выбранные участники -->
             </div>
@@ -292,7 +374,7 @@
     </div>
     
     <script>
-        // Данные о гостях (из предыдущего кода)
+        // Данные о гостях
         var guestNames = [
             "Анастасия", "Дмитрий", "Наталья", "Григорий", "Виктор",
             "Алексей", "Ольга", "Наталья", "Ольга", "Роман",
@@ -341,6 +423,37 @@
             "bride", "groom", "bride", "bride", "bride", "bride"
         ];
         
+        // Массив для хранения количества участий каждого гостя
+        var participationCount = new Array(guestNames.length).fill(0);
+        
+        // Массив для хранения уже выбранных гостей в текущем круге
+        var selectedInCurrentRound = [];
+        
+        // Текущий круг (1 - первый круг, 2 - второй и т.д.)
+        var currentRound = 1;
+        
+        // Функция для обновления статистики
+        function updateStats() {
+            var total = guestNames.length;
+            var participated = participationCount.filter(count => count > 0).length;
+            var remaining = total - participated;
+            
+            $("#total-guests").text(total);
+            $("#participated-guests").text(participated);
+            $("#remaining-guests").text(remaining);
+            
+            // Обновляем информацию о круге
+            var roundText = "Первый круг участия";
+            if (currentRound === 2) {
+                roundText = "Второй круг участия";
+            } else if (currentRound === 3) {
+                roundText = "Третий круг участия";
+            } else if (currentRound > 3) {
+                roundText = currentRound + "-й круг участия";
+            }
+            $("#round-info").text(roundText);
+        }
+        
         // Функция для запуска рандомизации
         function startRandomization() {
             // Скрываем результаты и ошибки
@@ -365,20 +478,29 @@
             // Имитируем задержку для анимации
             setTimeout(function() {
                 // Фильтруем гостей по критериям
-                var filteredGuests = filterGuests(genderFilter, sideFilter);
+                var availableGuests = getAvailableGuests(genderFilter, sideFilter);
                 
                 // Проверяем, достаточно ли гостей после фильтрации
-                if (filteredGuests.length < count) {
-                    showError("Недостаточно гостей, соответствующих критериям. Доступно: " + filteredGuests.length);
+                if (availableGuests.length < count) {
+                    showError("Недостаточно гостей, соответствующих критериям. Доступно: " + availableGuests.length);
                     $("#spinner").hide();
                     return;
                 }
                 
                 // Выбираем случайных участников
-                var selectedGuests = selectRandomGuests(filteredGuests, count);
+                var selectedGuests = selectRandomGuests(availableGuests, count);
+                
+                // Обновляем счетчик участий
+                selectedGuests.forEach(function(guestIndex) {
+                    participationCount[guestIndex]++;
+                    selectedInCurrentRound.push(guestIndex);
+                });
                 
                 // Отображаем результаты
                 displayResults(selectedGuests);
+                
+                // Обновляем статистику
+                updateStats();
                 
                 // Скрываем спиннер и показываем результаты
                 $("#spinner").hide();
@@ -389,43 +511,67 @@
             }, 1500);
         }
         
-        // Функция для фильтрации гостей по критериям
-        function filterGuests(genderFilter, sideFilter) {
-            var filtered = [];
+        // Функция для получения доступных гостей с учетом критериев
+        function getAvailableGuests(genderFilter, sideFilter) {
+            var available = [];
             
+            // Сначала пытаемся найти гостей, которые еще не участвовали в текущем круге
             for (var i = 0; i < guestNames.length; i++) {
+                // Проверяем, участвовал ли гость в текущем круге
+                if (selectedInCurrentRound.includes(i)) continue;
+                
                 // Проверяем соответствие полу
                 var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
                 
                 // Проверяем соответствие стороне
                 var sideMatch = (sideFilter === "any" || guestSides[i] === sideFilter);
                 
-                // Если оба критерия совпадают, добавляем гостя в отфильтрованный список
+                // Если оба критерия совпадают, добавляем гостя в доступный список
                 if (genderMatch && sideMatch) {
-                    filtered.push(i);
+                    available.push(i);
                 }
             }
             
-            return filtered;
+            // Если доступных гостей недостаточно, начинаем новый круг
+            if (available.length === 0) {
+                currentRound++;
+                selectedInCurrentRound = [];
+                
+                // Повторяем поиск с очищенным списком участников текущего круга
+                for (var i = 0; i < guestNames.length; i++) {
+                    // Проверяем соответствие полу
+                    var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
+                    
+                    // Проверяем соответствие стороне
+                    var sideMatch = (sideFilter === "any" || guestSides[i] === sideFilter);
+                    
+                    // Если оба критерия совпадают, добавляем гостя в доступный список
+                    if (genderMatch && sideMatch) {
+                        available.push(i);
+                    }
+                }
+            }
+            
+            return available;
         }
         
         // Функция для выбора случайных гостей
-        function selectRandomGuests(guestIndexes, count) {
+        function selectRandomGuests(availableIndexes, count) {
             // Создаем копию массива, чтобы не изменять оригинал
-            var availableIndexes = [...guestIndexes];
+            var available = [...availableIndexes];
             var selected = [];
             
             // Выбираем случайных гостей
             for (var i = 0; i < count; i++) {
-                if (availableIndexes.length === 0) break;
+                if (available.length === 0) break;
                 
-                var randomIndex = Math.floor(Math.random() * availableIndexes.length);
-                var guestIndex = availableIndexes[randomIndex];
+                var randomIndex = Math.floor(Math.random() * available.length);
+                var guestIndex = available[randomIndex];
                 
                 selected.push(guestIndex);
                 
                 // Удаляем выбранного гостя из доступных
-                availableIndexes.splice(randomIndex, 1);
+                available.splice(randomIndex, 1);
             }
             
             return selected;
@@ -438,6 +584,11 @@
             
             selectedGuests.forEach(function(guestIndex) {
                 var card = $('<div class="participant-card"></div>');
+                
+                // Добавляем бейдж с количеством участий, если больше 1
+                if (participationCount[guestIndex] > 1) {
+                    card.append('<div class="reset-badge">' + participationCount[guestIndex] + '</div>');
+                }
                 
                 // Создаем изображение
                 var img = new Image();
@@ -452,6 +603,13 @@
                 var info = $('<div class="participant-info"></div>');
                 info.append('<div class="participant-name">' + guestNames[guestIndex] + '</div>');
                 info.append('<div class="participant-status">' + guestStatuses[guestIndex] + '</div>');
+                
+                // Добавляем информацию о количестве участий
+                var timesText = "Участвует впервые";
+                if (participationCount[guestIndex] > 1) {
+                    timesText = "Участвует " + participationCount[guestIndex] + " раз";
+                }
+                info.append('<div class="participant-times">' + timesText + '</div>');
                 
                 // Добавляем изображение и информацию в карточку
                 card.append(img);
@@ -487,6 +645,21 @@
         function showError(message) {
             $("#error-message").text(message).show();
         }
+        
+        // Функция для сброса выбора
+        function resetSelection() {
+            participationCount = new Array(guestNames.length).fill(0);
+            selectedInCurrentRound = [];
+            currentRound = 1;
+            updateStats();
+            $("#results-container").hide();
+            alert("Выбор участников сброшен! Все гости снова доступны для выбора.");
+        }
+        
+        // Инициализация при загрузке страницы
+        $(document).ready(function() {
+            updateStats();
+        });
     </script>
 </body>
 </html>
