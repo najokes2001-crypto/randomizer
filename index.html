@@ -3,217 +3,714 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Система управления гостями</title>
+    <title>Рандомайзер участников конкурса</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .guest-list {
-            margin: 20px 0;
-        }
-
-        .guest-item {
-            padding: 10px;
-            border: 1px solid #ddd;
-            margin: 5px 0;
-            border-radius: 5px;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
+            padding: 20px;
+            font-size: 18px;
+            overflow-x: hidden;
         }
-
-        .replace-btn {
-            background-color: #ff6b6b;
+        
+        .main {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 1200px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            color: #e91e63;
+            margin-bottom: 20px;
+            font-size: 42px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #555;
+            margin: 20px 0;
+            font-size: 28px;
+        }
+        
+        h3 {
+            font-size: 22px;
+            color: #777;
+            margin: 15px 0;
+        }
+        
+        .form-container {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: left;
+            border-left: 5px solid #e91e63;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+            font-size: 20px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #e91e63;
+            outline: none;
+            box-shadow: 0 0 10px rgba(233,30,99,0.3);
+        }
+        
+        .my_button {
+            background: linear-gradient(45deg, #e91e63, #ff4081);
             color: white;
             border: none;
-            padding: 8px 12px;
-            border-radius: 5px;
+            padding: 15px 30px;
+            margin: 20px 0;
+            border-radius: 20px;
+            font-size: 22px;
             cursor: pointer;
-            font-size: 14px;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: inline-block;
         }
-
-        .replace-btn:hover {
-            background-color: #ff5252;
+        
+        .my_button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(233,30,99,0.4);
         }
-
-        .filter-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 5px;
+        
+        .my_button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
-
-        .modal {
+        
+        .secondary_button {
+            background: linear-gradient(45deg, #2196f3, #21cbf3);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 15px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: inline-block;
+        }
+        
+        .secondary_button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(33,150,243,0.4);
+        }
+        
+        .results-container {
             display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            margin-top: 30px;
+            animation: fadeIn 0.5s ease;
         }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 300px;
-            margin: 100px auto;
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .participants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .participant-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            border: 3px solid #ffeb3b;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .participant-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+        }
+        
+        .participant-image-container {
+            width: 100%;
+            height: 320px; /* Увеличили высоту для вертикальных фото 3x4 */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 3px solid #ffeb3b;
+            background-color: #f5f5f5;
+        }
+        
+        .participant-image {
+            height: 100%;
+            width: auto;
+            object-fit: contain;
+        }
+        
+        .participant-info {
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        
+        .participant-name {
+            font-size: 22px;
+            font-weight: bold;
+            color: #e91e63;
+            margin-bottom: 8px;
+        }
+        
+        .participant-status {
+            font-size: 18px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        
+        .participant-times {
+            font-size: 16px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 7px solid #f3f3f3;
+            border-top: 7px solid #e91e63;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .confetti {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background: #f00;
+            opacity: 0.8;
+            border-radius: 0;
+            animation: confettiFall 5s linear forwards;
+            z-index: 100;
+        }
+        
+        @keyframes confettiFall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(1000px) rotate(720deg); opacity: 0; }
+        }
+        
+        .error-message {
+            color: #f44336;
+            font-size: 18px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .stats-container {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .stats-item {
+            display: inline-block;
+            margin: 0 15px;
+            font-size: 18px;
+            color: #555;
+        }
+        
+        .stats-value {
+            font-weight: bold;
+            color: #e91e63;
+        }
+        
+        .reset-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .participants-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+            
+            .participant-image-container {
+                height: 280px;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            h2 {
+                font-size: 24px;
+            }
+            
+            .my_button {
+                font-size: 20px;
+                padding: 12px 25px;
+            }
+            
+            .stats-item {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .main {
+                padding: 20px;
+            }
+            
+            .participants-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .participant-image-container {
+                height: 250px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .form-container {
+                padding: 15px;
+            }
+            
+            label, input, select {
+                font-size: 16px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Список гостей</h1>
-
-    <div class="filter-section">
-        <label>
-            <input type="checkbox" id="coupleFilter"> Исключить жениха и невесту
-        </label>
-    </div>
-
-    <div id="guestList" class="guest-list">
-        <!-- Список гостей будет сгенерирован здесь -->
-    </div>
-
-    <!-- Модальное окно для замены -->
-    <div id="replaceModal" class="modal">
-        <div class="modal-content">
-            <h3>Замена участника</h3>
-            <p>Выберите нового участника для замены:</p>
-            <select id="newParticipantSelect"></select>
-            <div style="margin-top: 20px;">
-                <button onclick="confirmReplace()">Подтвердить</button>
-                <button onclick="closeModal()" style="background-color: #ccc;">Отмена</button>
+    <div class='main'>
+        <h1>🎲 Рандомайзер участников конкурса 🎲</h1>
+        
+        <div class="stats-container">
+            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">36</span></div>
+            <div class="stats-item">Уже участвовали: <span class="stats-value" id="participated-guests">0</span></div>
+            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">36</span></div>
+        </div>
+        
+        <div class="form-container">
+            <div class="form-group">
+                <label for="participants-count">Количество участников:</label>
+                <input type="number" id="participants-count" min="1" max="36" value="5">
+            </div>
+            
+            <div class="form-group">
+                <label for="gender-filter">Пол участников:</label>
+                <select id="gender-filter">
+                    <option value="any">Без разницы</option>
+                    <option value="male">Мужской</option>
+                    <option value="female">Женский</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="side-filter">Сторона:</label>
+                <select id="side-filter">
+                    <option value="any">Без разницы</option>
+                    <option value="bride">Сторона невесты</option>
+                    <option value="groom">Сторона жениха</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="couple-filter">Жених и невеста:</label>
+                <select id="couple-filter">
+                    <option value="include">Включать в выборку</option>
+                    <option value="exclude" selected>Исключить из выборки</option>
+                </select>
+            </div>
+        </div>
+        
+        <button class="my_button" onclick="startRandomization()">Запустить отбор!</button>
+        <button class="secondary_button" onclick="resetSelection()">Сбросить выбор</button>
+        
+        <div class="spinner" id="spinner"></div>
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="results-container" id="results-container">
+            <h2>Выбранные участники:</h2>
+            <h3 id="round-info">Первый круг участия</h3>
+            <div class="participants-grid" id="participants-grid">
+                <!-- Здесь будут отображаться выбранные участники -->
             </div>
         </div>
     </div>
-
+    
     <script>
-        // Пример данных
-        const guestData = [
-            { id: 1, name: "Анна", status: "Гость" },
-            { id: 2, name: "Иван", status: "Гость" },
-            { id: 3, name: "Мария", status: "Невеста 👰" },
-            { id: 4, name: "Петр", status: "Жених 🤵" },
-            { id: 5, name: "Ольга", status: "Гость" }
+        // Данные о гостях
+        var guestNames = [
+            "Анастасия", "Дмитрий", "Наталья", "Григорий", "Виктор",
+            "Алексей", "Ольга", "Наталья", "Ольга", "Роман",
+            "Лилия", "Даниил", "Илья", "Наталья", "Даниил",
+            "Антонина", "Дмитрий", "Алена", "Илья", "Дмитрий",
+            "Мария", "Анастасия", "Влад", "Любовь", "Любовь",
+            "Роман", "Светлана", "Анастасия", "Анастасия", "Анна",
+            "Ярослав", "Иван", "Илья", "Любовь", "Марина", "Эдгар"
         ];
 
-        const availableParticipants = [
-            { id: 6, name: "Сергей", status: "Резерв" },
-            { id: 7, name: "Елена", status: "Резерв" },
-            { id: 8, name: "Дмитрий", status: "Резерв" }
+        var guestStatuses = [
+            "Невеста 👰", "Жених 🤵", "Мама невесты 👩", "Папа невесты 👨", "Брат невесты 👦",
+            "Папа жениха 👨", "Мачеха жениха 👩", "Бабушка жениха 👵", "Бабушка невесты 👵", "Брат жениха 👦",
+            "Сестра жениха 👧", "Брат невесты 👦", "Дядя невесты 👨", "Крестная/тетя невесты 👩", "Друг жениха 🎮",
+            "Вторая половинка друга жениха 💑", "Друг жениха 🎮", "Подруга жениха 💃", "Друг жениха 🎮", "Друг жениха 🎮",
+            "Подруга жениха 💃", "Подруга невесты 💃", "Друг жениха 🎮", "Подруга невесты 💃", "Подруга невесты 💃",
+            "Друг невесты 🎮", "Подруга невесты 💃", "Подруга невесты 💃", "Подруга невесты 💃", "Подруга невесты 💃",
+            "Друг невесты 🎮", "Друг жениха 🎮", "Друг невесты 🎮", "Сводная сестра 👧", "Тетя невесты 👩", "Брат невесты 👦"
         ];
 
-        let currentGuestIdToReplace = null;
-
-        // Инициализация
-        function init() {
-            renderGuestList();
-            document.getElementById('coupleFilter').addEventListener('change', renderGuestList);
+        // Массив с именами файлов фотографий
+        var images = [];
+        for (var i = 2; i <= 36; i++) {
+            images.push("1 (" + i + ").jpg");
         }
-
-        // Рендер списка гостей
-        function renderGuestList() {
-            const guestList = document.getElementById('guestList');
-            const coupleFilter = document.getElementById('coupleFilter').checked;
+        
+        // Определяем пол для каждого гостя
+        var guestGenders = [
+            "female", "male", "female", "male", "male",
+            "male", "female", "female", "female", "male",
+            "female", "male", "male", "female", "male",
+            "female", "male", "female", "male", "male",
+            "female", "female", "male", "female", "female",
+            "male", "female", "female", "female", "female",
+            "male", "male", "male", "female", "female", "male"
+        ];
+        
+        // Определяем сторону для каждого гостя
+        var guestSides = [
+            "bride", "groom", "bride", "bride", "bride",
+            "groom", "groom", "groom", "bride", "groom",
+            "groom", "bride", "bride", "bride", "groom",
+            "groom", "groom", "groom", "groom", "groom",
+            "groom", "bride", "groom", "bride", "bride",
+            "bride", "bride", "bride", "bride", "bride",
+            "bride", "groom", "bride", "bride", "bride", "bride"
+        ];
+        
+        // Массив для хранения количества участий каждого гостя
+        var participationCount = new Array(guestNames.length).fill(0);
+        
+        // Массив для хранения уже выбранных гостей в текущем круге
+        var selectedInCurrentRound = [];
+        
+        // Текущий круг (1 - первый круг, 2 - второй и т.д.)
+        var currentRound = 1;
+        
+        // Функция для обновления статистики
+        function updateStats() {
+            var total = guestNames.length;
+            var participated = participationCount.filter(count => count > 0).length;
+            var remaining = total - participated;
             
-            guestList.innerHTML = '';
-
-            guestData.forEach(guest => {
-                // Проверяем, нужно ли исключать жениха и невесту
-                if (coupleFilter && (guest.status === "Невеста 👰" || guest.status === "Жених 🤵")) {
-                    return; // Пропускаем итерацию
-                }
-
-                const guestItem = document.createElement('div');
-                guestItem.className = 'guest-item';
-                guestItem.innerHTML = `
-                    <div>
-                        <strong>${guest.name}</strong> - ${guest.status}
-                    </div>
-                `;
-
-                // Добавляем кнопку замены для всех кроме жениха и невесты
-                if (guest.status !== "Невеста 👰" && guest.status !== "Жених 🤵") {
-                    const replaceButton = document.createElement('button');
-                    replaceButton.textContent = 'Участник не хочет участвовать - заменить';
-                    replaceButton.className = 'replace-btn';
-                    replaceButton.onclick = () => openReplaceModal(guest.id);
-                    guestItem.appendChild(replaceButton);
-                }
-
-                guestList.appendChild(guestItem);
-            });
-        }
-
-        // Открытие модального окна для замены
-        function openReplaceModal(guestId) {
-            currentGuestIdToReplace = guestId;
-            const select = document.getElementById('newParticipantSelect');
+            $("#total-guests").text(total);
+            $("#participated-guests").text(participated);
+            $("#remaining-guests").text(remaining);
             
-            // Заполняем select доступными участниками
-            select.innerHTML = '';
-            availableParticipants.forEach(participant => {
-                const option = document.createElement('option');
-                option.value = participant.id;
-                option.textContent = `${participant.name} (${participant.status})`;
-                select.appendChild(option);
-            });
-
-            document.getElementById('replaceModal').style.display = 'block';
+            // Обновляем информацию о круге
+            var roundText = "Первый круг участия";
+            if (currentRound === 2) {
+                roundText = "Второй круг участия";
+            } else if (currentRound === 3) {
+                roundText = "Третий круг участия";
+            } else if (currentRound > 3) {
+                roundText = currentRound + "-й круг участия";
+            }
+            $("#round-info").text(roundText);
         }
-
-        // Закрытие модального окна
-        function closeModal() {
-            document.getElementById('replaceModal').style.display = 'none';
-            currentGuestIdToReplace = null;
-        }
-
-        // Подтверждение замены
-        function confirmReplace() {
-            if (!currentGuestIdToReplace) return;
-
-            const select = document.getElementById('newParticipantSelect');
-            const selectedParticipantId = parseInt(select.value);
-            const selectedParticipant = availableParticipants.find(p => p.id === selectedParticipantId);
-
-            if (selectedParticipant) {
-                // Находим индекс гостя для замены
-                const guestIndex = guestData.findIndex(g => g.id === currentGuestIdToReplace);
+        
+        // Функция для запуска рандомизации
+        function startRandomization() {
+            // Скрываем результаты и ошибки
+            $("#results-container").hide();
+            $("#error-message").hide();
+            
+            // Показываем спиннер
+            $("#spinner").show();
+            
+            // Получаем значения фильтров
+            var count = parseInt($("#participants-count").val());
+            var genderFilter = $("#gender-filter").val();
+            var sideFilter = $("#side-filter").val();
+            var coupleFilter = $("#couple-filter").val();
+            
+            // Проверяем корректность ввода
+            if (isNaN(count) || count < 1 || count > 36) {
+                showError("Пожалуйста, введите число от 1 до 36");
+                $("#spinner").hide();
+                return;
+            }
+            
+            // Имитируем задержку для анимации
+            setTimeout(function() {
+                // Фильтруем гостей по критериям
+                var availableGuests = getAvailableGuests(genderFilter, sideFilter, coupleFilter);
                 
-                if (guestIndex !== -1) {
-                    // Заменяем гостя
-                    guestData[guestIndex] = {
-                        ...selectedParticipant,
-                        status: "Гость" // Меняем статус на обычного гостя
-                    };
-
-                    // Удаляем участника из доступных
-                    availableParticipants.splice(availableParticipants.findIndex(p => p.id === selectedParticipantId), 1);
-
-                    // Обновляем список
-                    renderGuestList();
-                    closeModal();
-                    
-                    alert('Участник успешно заменен!');
+                // Проверяем, достаточно ли гостей после фильтрации
+                if (availableGuests.length < count) {
+                    showError("Недостаточно гостей, соответствующих критериям. Доступно: " + availableGuests.length);
+                    $("#spinner").hide();
+                    return;
+                }
+                
+                // Выбираем случайных участников
+                var selectedGuests = selectRandomGuests(availableGuests, count);
+                
+                // Обновляем счетчик участий
+                selectedGuests.forEach(function(guestIndex) {
+                    participationCount[guestIndex]++;
+                    selectedInCurrentRound.push(guestIndex);
+                });
+                
+                // Отображаем результаты
+                displayResults(selectedGuests);
+                
+                // Обновляем статистику
+                updateStats();
+                
+                // Скрываем спиннер и показываем результаты
+                $("#spinner").hide();
+                $("#results-container").show();
+                
+                // Создаем конфетти для праздничного эффекта
+                createConfetti();
+            }, 1500);
+        }
+        
+        // Функция для получения доступных гостей с учетом критериев
+        function getAvailableGuests(genderFilter, sideFilter, coupleFilter) {
+            var available = [];
+            
+            // Сначала пытаемся найти гостей, которые еще не участвовали в текущем круге
+            for (var i = 0; i < guestNames.length; i++) {
+                // Проверяем, участвовал ли гость в текущем круге
+                if (selectedInCurrentRound.includes(i)) continue;
+                
+                // Проверяем, нужно ли исключать жениха и невесту
+                if (coupleFilter === "exclude" && (guestStatuses[i] === "Невеста 👰" || guestStatuses[i] === "Жених 🤵")) {
+                    continue;
+                }
+                
+                // Проверяем соответствие полу
+                var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
+                
+                // Проверяем соответствие стороне
+                var sideMatch = (sideFilter === "any" || guestSides[i] === sideFilter);
+                
+                // Если оба критерия совпадают, добавляем гостя в доступный список
+                if (genderMatch && sideMatch) {
+                    available.push(i);
                 }
             }
+            
+            // Если доступных гостей недостаточно, начинаем новый круг
+            if (available.length === 0) {
+                currentRound++;
+                selectedInCurrentRound = [];
+                
+                // Повторяем поиск с очищенным списком участников текущего круга
+                for (var i = 0; i < guestNames.length; i++) {
+                    // Проверяем, нужно ли исключать жениха и невесту
+                    if (coupleFilter === "exclude" && (guestStatuses[i] === "Невеста 👰" || guestStatuses[i] === "Жених 🤵")) {
+                        continue;
+                    }
+                    
+                    // Проверяем соответствие полу
+                    var genderMatch = (genderFilter === "any" || guestGenders[i] === genderFilter);
+                    
+                    // Проверяем соответствие стороне
+                    var sideMatch = (sideFilter === "any" || guestSides[i] === sideFilter);
+                    
+                    // Если оба критерия совпадают, добавляем гостя в доступный список
+                    if (genderMatch && sideMatch) {
+                        available.push(i);
+                    }
+                }
+            }
+            
+            return available;
         }
-
-        // Закрытие модального окна при клике вне его
-        window.onclick = function(event) {
-            const modal = document.getElementById('replaceModal');
-            if (event.target === modal) {
-                closeModal();
+        
+        // Функция для выбора случайных гостей
+        function selectRandomGuests(availableIndexes, count) {
+            // Создаем копию массива, чтобы не изменять оригинал
+            var available = [...availableIndexes];
+            var selected = [];
+            
+            // Выбираем случайных гостей
+            for (var i = 0; i < count; i++) {
+                if (available.length === 0) break;
+                
+                var randomIndex = Math.floor(Math.random() * available.length);
+                var guestIndex = available[randomIndex];
+                
+                selected.push(guestIndex);
+                
+                // Удаляем выбранного гостя из доступных
+                available.splice(randomIndex, 1);
+            }
+            
+            return selected;
+        }
+        
+        // Функция для отображения результатов
+        function displayResults(selectedGuests) {
+            var grid = $("#participants-grid");
+            grid.empty();
+            
+            selectedGuests.forEach(function(guestIndex) {
+                var card = $('<div class="participant-card"></div>');
+                
+                // Добавляем бейдж с количеством участий, если больше 1
+                if (participationCount[guestIndex] > 1) {
+                    card.append('<div class="reset-badge">' + participationCount[guestIndex] + '</div>');
+                }
+                
+                // Создаем контейнер для изображения
+                var imgContainer = $('<div class="participant-image-container"></div>');
+                
+                // Создаем изображение
+                var img = new Image();
+                img.className = "participant-image";
+                img.alt = guestNames[guestIndex];
+                img.onerror = function() {
+                    this.src = "https://via.placeholder.com/210x280/ffeb3b/000?text=Фото+не+найдено";
+                    this.style.width = "auto";
+                    this.style.height = "100%";
+                };
+                img.src = images[guestIndex];
+                
+                // Добавляем изображение в контейнер
+                imgContainer.append(img);
+                
+                // Создаем информацию об участнике
+                var info = $('<div class="participant-info"></div>');
+                info.append('<div class="participant-name">' + guestNames[guestIndex] + '</div>');
+                info.append('<div class="participant-status">' + guestStatuses[guestIndex] + '</div>');
+                
+                // Добавляем информацию о количестве участий
+                var timesText = "Участвует впервые";
+                if (participationCount[guestIndex] > 1) {
+                    timesText = "Участвует " + participationCount[guestIndex] + " раз";
+                }
+                info.append('<div class="participant-times">' + timesText + '</div>');
+                
+                // Добавляем контейнер с изображением и информацию в карточку
+                card.append(imgContainer);
+                card.append(info);
+                
+                // Добавляем карточку в сетку
+                grid.append(card);
+            });
+        }
+        
+        // Функция для создания конфетти
+        function createConfetti() {
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const container = $('.main');
+            
+            for (let i = 0; i < 30; i++) {
+                const confetti = $('<div class="confetti"></div>');
+                confetti.css({
+                    left: Math.random() * 100 + '%',
+                    background: colors[Math.floor(Math.random() * colors.length)],
+                    transform: 'rotate(' + (Math.random() * 360) + 'deg)'
+                });
+                
+                container.append(confetti);
+                
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
             }
         }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', init);
+        
+        // Функция для отображения ошибки
+        function showError(message) {
+            $("#error-message").text(message).show();
+        }
+        
+        // Функция для сброса выбора
+        function resetSelection() {
+            participationCount = new Array(guestNames.length).fill(0);
+            selectedInCurrentRound = [];
+            currentRound = 1;
+            updateStats();
+            $("#results-container").hide();
+            alert("Выбор участников сброшен! Все гости снова доступны для выбора.");
+        }
+        
+        // Инициализация при загрузке страницы
+        $(document).ready(function() {
+            updateStats();
+        });
     </script>
 </body>
 </html>
