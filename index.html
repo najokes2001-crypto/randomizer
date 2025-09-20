@@ -175,7 +175,7 @@
         
         .participant-image-container {
             width: 100%;
-            height: 320px; /* Увеличили высоту для вертикальных фото 3x4 */
+            height: 320px;
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -230,7 +230,7 @@
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
-            100% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .confetti {
@@ -352,15 +352,15 @@
         <h1>🎲 Рандомайзер участников конкурса 🎲</h1>
         
         <div class="stats-container">
-            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">37</span></div>
+            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">36</span></div>
             <div class="stats-item">Уже участвовали: <span class="stats-value" id="participated-guests">0</span></div>
-            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">37</span></div>
+            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">36</span></div>
         </div>
         
         <div class="form-container">
             <div class="form-group">
                 <label for="participants-count">Количество участников:</label>
-                <input type="number" id="participants-count" min="1" max="37" value="5">
+                <input type="number" id="participants-count" min="1" max="36" value="5">
             </div>
             
             <div class="form-group">
@@ -385,7 +385,7 @@
                 <label for="couple-filter">Жених и невеста:</label>
                 <select id="couple-filter">
                     <option value="include">Включать в выборку</option>
-                    <option value="exclude" selected>Исключить из выборки</option>
+                    <option value="exclude" selected>Исключить из выборку</option>
                 </select>
             </div>
         </div>
@@ -427,7 +427,7 @@
             "Друг невесты 🎮", "Друг жениха 🎮", "Друг невесты 🎮", "Сводная сестра 👧", "Тетя невесты 👩", "Брат невесты 👦"
         ];
 
-        // Массив с именами файлов фотографий
+        // Массив с именами файлов фотографий (исправленный)
         var images = [];
         for (var i = 2; i <= 37; i++) {
             images.push("1 (" + i + ").jpg");
@@ -502,8 +502,8 @@
             var coupleFilter = $("#couple-filter").val();
             
             // Проверяем корректность ввода
-            if (isNaN(count) || count < 1 || count > 37) {
-                showError("Пожалуйста, введите число от 1 до 37");
+            if (isNaN(count) || count < 1 || count > 36) {
+                showError("Пожалуйста, введите число от 1 до 36");
                 $("#spinner").hide();
                 return;
             }
@@ -673,7 +673,7 @@
         
         // Функция для создания конфетти
         function createConfetti() {
-            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', #ffff00', '#ff00ff', '#00ffff'];
             const container = $('.main');
             
             for (let i = 0; i < 30; i++) {
