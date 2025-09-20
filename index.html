@@ -230,7 +230,7 @@
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            100% { transform: rotate(0deg); }
         }
         
         .confetti {
@@ -352,15 +352,15 @@
         <h1>🎲 Рандомайзер участников конкурса 🎲</h1>
         
         <div class="stats-container">
-            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">36</span></div>
+            <div class="stats-item">Всего гостей: <span class="stats-value" id="total-guests">37</span></div>
             <div class="stats-item">Уже участвовали: <span class="stats-value" id="participated-guests">0</span></div>
-            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">36</span></div>
+            <div class="stats-item">Осталось: <span class="stats-value" id="remaining-guests">37</span></div>
         </div>
         
         <div class="form-container">
             <div class="form-group">
                 <label for="participants-count">Количество участников:</label>
-                <input type="number" id="participants-count" min="1" max="36" value="5">
+                <input type="number" id="participants-count" min="1" max="37" value="5">
             </div>
             
             <div class="form-group">
@@ -429,7 +429,7 @@
 
         // Массив с именами файлов фотографий
         var images = [];
-        for (var i = 2; i <= 36; i++) {
+        for (var i = 2; i <= 37; i++) {
             images.push("1 (" + i + ").jpg");
         }
         
@@ -502,8 +502,8 @@
             var coupleFilter = $("#couple-filter").val();
             
             // Проверяем корректность ввода
-            if (isNaN(count) || count < 1 || count > 36) {
-                showError("Пожалуйста, введите число от 1 до 36");
+            if (isNaN(count) || count < 1 || count > 37) {
+                showError("Пожалуйста, введите число от 1 до 37");
                 $("#spinner").hide();
                 return;
             }
